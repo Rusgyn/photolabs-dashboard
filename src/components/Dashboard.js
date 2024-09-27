@@ -36,10 +36,10 @@ class Dashboard extends Component {
   };
   // Instance method
   selectPanel(id) {
-    this.setState({
-      focused: id
-    })
-  };
+    this.setState( previousState => ({
+      focused: previousState.focused !== null ? null : id
+    }));
+  }
 
   render() {
     const dashboardClasses = classnames("dashboard", { 
@@ -55,10 +55,9 @@ class Dashboard extends Component {
     const panels = toggleFocused.map(panel => (
       <Panel
         key={panel.id}
-        id={panel.id}
         label={panel.label}
         value={panel.value}
-        onSelect={this.selectPanel}
+        onSelect={event => { this.selectPanel(panel.id) } }
       />
     ));
 
