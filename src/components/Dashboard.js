@@ -31,8 +31,10 @@ const data = [
 
 class Dashboard extends Component {
   state = {
-    loading: false,
-    focused: null
+    loading: true,
+    focused: null,
+    photos: [],
+    topics: []
   };
   // Instance method
   selectPanel(id) {
@@ -41,15 +43,40 @@ class Dashboard extends Component {
     }));
   }
 
+  componentDidMount() {
+    const focused = JSON.parse(localStorage.getItem("focused"));
+    const urlsPromise = [
+      "/api/photos", //use this format because proxy has been declared in photolabs API package json
+      "/api/topics",
+    ].map(url => fetch(url).then(response => response.json()));
+    
+    Promise.all(urlsPromise)
+    .then(([photos, topics]) => {
+      this.setState({
+        loading: false,
+        photos: photos,
+        topics: topics
+      });
+    });
+
+    if (focused) {
+      this.setState({ focused });
+    }
+  };
+
+  componentDidUpdate(previousProps, previousState) {
+    if (previousState.focused !== this.state.focused) {
+      localStorage.setItem("focused", JSON.stringify(this.state.focused));
+    }
+  }
+
   render() {
     const dashboardClasses = classnames("dashboard", { 
       "dashboard--focused": this.state.focused
     });
-
-    if (this.state.loading) {
-      return <Loading />;
-    }
-
+    console.log(this.state);
+    if (this.state.loading) return < Loading />;
+   
     const toggleFocused = (this.state.focused ? data.filter((panel) => this.state.focused === panel.id) : data);
 
     const panels = toggleFocused.map(panel => (
